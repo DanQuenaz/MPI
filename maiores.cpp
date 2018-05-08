@@ -7,7 +7,6 @@
 using namespace std;
 
 void geraVetor(int vet[], int n){//Gera vetor con n valores aleatórios.
-	srand(time(NULL));
 	for(int i=0; i<n; ++i){
 		vet[i] = rand()%1000;
 	}
@@ -38,7 +37,7 @@ int main( int argc, char **argv)
 	int rank, inicio, fim, passo, rest, pmaior, smaior, n;
 	int *vet;
 	MPI_Status status;
-
+	srand(322);
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank( MPI_COMM_WORLD, &rank );
 	
@@ -49,8 +48,7 @@ int main( int argc, char **argv)
 		cout<<"Quantidade: "; cin>>n;//Quantidade de elementos
 
 		//Envia quantidade de elementos para os outros nós
-		MPI_Send( &n, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
-		MPI_Send( &n, 1, MPI_INT, 2, 0, MPI_COMM_WORLD);
+		MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
 		
 		//Aloca vetor
 		vet = new int[n];
@@ -89,37 +87,18 @@ int main( int argc, char **argv)
 		//Econtra os 2 maiores dentre os 4 recebidos
 		pmaior = p1maior >= p2maior ? p1maior : p2maior;
 		smaior = s1maior >= s2maior ? s1maior : s2maior;
-		p1maior >= p2maior ? (smaior = smaior >= p2maior ? smaior : p2maior) : smaior = smaior >= p1maior ? smaior : p1maior;
+		p1maior >= p2maior ? (smaior = smaior >= p2maior ? smaior : p2maior) : (smaior = smaior >= p1maior ? smaior : p1maior);
 
 		cout<<"1 - "<<pmaior<<"\n2 - "<<smaior<<endl;
 
-	}else if (rank == 1) {
-		//Recebe quantidade de elementos e aloca vetor
-		MPI_Recv( &n, 1, MPI_INT,0,0,MPI_COMM_WORLD,&status );
-		vet = new int[n];
-
-		//Recebe intervalos e valores do vetor
-		MPI_Recv( &inicio, 1, MPI_INT,0,0,MPI_COMM_WORLD,&status );
-		MPI_Recv( &fim, 1, MPI_INT,0,0,MPI_COMM_WORLD,&status );
-		MPI_Recv( vet, n, MPI_INT,0,0,MPI_COMM_WORLD,&status );
-
-		//Encontra os dois maiores do intervalo
-		encontraMaiores(vet, inicio, fim, pmaior, smaior);
-
-		//Envia para o nó principal os valores encontrados
-		MPI_Send( &pmaior, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
-		MPI_Send( &smaior, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
-
-		// cout<<"1: "<<pmaior<<" "<<smaior<<endl;
 	}else{
 		//Recebe quantidade de elementos e aloca vetor
-		MPI_Recv( &n, 1, MPI_INT,0,0,MPI_COMM_WORLD,&status );
+		MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
 		vet = new int[n];
-
+		geraVetor(vet, n);
 		//Recebe intervalos e valores do vetor
 		MPI_Recv( &inicio, 1, MPI_INT,0,0,MPI_COMM_WORLD,&status );
 		MPI_Recv( &fim, 1, MPI_INT,0,0,MPI_COMM_WORLD,&status );
-		MPI_Recv( vet, n, MPI_INT,0,0,MPI_COMM_WORLD,&status );
 
 		//Encontra os dois maiores do intervalo
 		encontraMaiores(vet, inicio, fim, pmaior, smaior);

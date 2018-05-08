@@ -14,7 +14,7 @@ using namespace std;
 #define l2  3
 #define c2  2
 
-void preencheMatrizes(int a[][c1], int b[][c2], int c[][c2], int d[][c2]){
+void preencheMatrizes(int a[][c1], int b[][c2], int c[][c2], int d[][c2]){//Inicializa as matrizes
 
     for(int i=0; i<l1; ++i){
         for(int j=0; j<c1; ++j){
@@ -36,7 +36,7 @@ void preencheMatrizes(int a[][c1], int b[][c2], int c[][c2], int d[][c2]){
     }
 }
 
-void imprimeResultado(int a[][c1], int b[][c2], int c[][c2], int d[][c2]){
+void imprimeResultado(int a[][c1], int b[][c2], int c[][c2], int d[][c2]){//Imprime as matrizes
     cout<<"MATRIZ A: "<<endl;
     for(int i=0; i<l1; ++i){
         for(int j=0; j<c1; ++j){
@@ -59,17 +59,6 @@ void imprimeResultado(int a[][c1], int b[][c2], int c[][c2], int d[][c2]){
     for(int i=0; i<l1; ++i){
         for(int j=0; j<c2; ++j){
             cout<<d[i][j]<<" ";
-        }
-        cout<<endl;
-    }
-    cout<<endl<<endl;
-}
-
-void pirntC(int c[][c2]){
-    cout<<"MATRIZ C: "<<endl;
-    for(int i=0; i<l1; ++i){
-        for(int j=0; j<c2; ++j){
-            cout<<c[i][j]<<" ";
         }
         cout<<endl;
     }
@@ -102,7 +91,7 @@ int main( int argc, char **argv ){
         int col = 0;
         int node = 1;
 
-        for(int i=0; i<totalOp; ++i){
+        for(int i=0; i<totalOp; ++i){//Distribui para cada nó linhas e colunas a serem multiplicadas
             intervalos[0] = line;
             intervalos[1] = col++;
             intervalos[2] = node++; if(node >= size) node = 1;
@@ -116,10 +105,10 @@ int main( int argc, char **argv ){
         MPI_Bcast(intervalos, 3, MPI_INT, 0, MPI_COMM_WORLD); 
     }else{
         while(intervalos[0] != -1){
-            MPI_Bcast(intervalos, 3, MPI_INT, 0, MPI_COMM_WORLD);
+            MPI_Bcast(intervalos, 3, MPI_INT, 0, MPI_COMM_WORLD);//Recebe uma linha e coluna
             if(intervalos[2] == rank && intervalos[0] != -1){
                 for(int i=0; i<c1; ++i){
-                    c[intervalos[0]][intervalos[1]] += a[intervalos[0]][i] * b[i][intervalos[1]];
+                    c[intervalos[0]][intervalos[1]] += a[intervalos[0]][i] * b[i][intervalos[1]];//Multiplica essa linha e coluna
                 }
             }
         }
@@ -127,7 +116,7 @@ int main( int argc, char **argv ){
 
     for(int i = 0; i<l1; ++i){
         for(int j=0; j<c2; ++j){
-            MPI_Reduce(&(c[i][j]), &(d[i][j]), 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+            MPI_Reduce(&(c[i][j]), &(d[i][j]), 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);//Soma todos elementos calculados por cada nó em uma única matriz
         }
     }
 
